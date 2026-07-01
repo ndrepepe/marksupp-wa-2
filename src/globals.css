@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Palet: 640D5F (Primary), B12C00 (Secondary), EB5B00 (Accent), FFCC00 (Highlight) */
+    --background: 30 20% 98%;
+    --foreground: 303 76% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 303 76% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 303 76% 10%;
+
+    /* 640D5F -> HSL(303, 76%, 21%) */
+    --primary: 303 76% 21%;
+    --primary-foreground: 0 0% 100%;
+
+    /* B12C00 -> HSL(15, 100%, 35%) */
+    --secondary: 15 100% 35%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* FFCC00 -> HSL(48, 100%, 50%) - Digunakan untuk muted/background halus */
+    --muted: 48 100% 92%;
+    --muted-foreground: 303 76% 25%;
+
+    /* EB5B00 -> HSL(23, 100%, 46%) */
+    --accent: 23 100% 46%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 303 20% 90%;
+    --input: 303 20% 90%;
+    --ring: 303 76% 21%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 303 20% 96%;
+    --sidebar-foreground: 303 76% 15%;
+    --sidebar-primary: 303 76% 21%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 23 100% 46%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 303 20% 90%;
+    --sidebar-ring: 303 76% 21%;
+  }
+
+  .dark {
+    --background: 303 50% 5%;
+    --foreground: 48 100% 90%;
+
+    --card: 303 50% 8%;
+    --card-foreground: 48 100% 90%;
+
+    --popover: 303 50% 8%;
+    --popover-foreground: 48 100% 90%;
+
+    --primary: 303 76% 21%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 15 100% 35%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 303 30% 15%;
+    --muted-foreground: 48 100% 70%;
+
+    --accent: 23 100% 46%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 303 30% 20%;
+    --input: 303 30% 20%;
+    --ring: 303 76% 21%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    height: auto;
+    min-height: 100%;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    min-height: 100vh;
+    height: auto;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
