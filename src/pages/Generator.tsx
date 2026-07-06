@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, RefreshCw, Save, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { logActivity } from "@/utils/logger";
-import { sendApprovalWhatsAppNotification } from "@/utils/whatsappNotifications";
+import { sendApprovalWhatsAppNotification, sendStaffInputWhatsAppNotification } from "@/utils/whatsappNotifications";
 import {
   Select,
   SelectContent,
@@ -153,11 +153,19 @@ const Generator = () => {
         description: "Data transaksi disimpan.",
       });
 
-      toast.promise(sendApprovalWhatsAppNotification(transactionData), {
-        loading: 'Mengirim notifikasi WhatsApp ke approver...',
-        success: 'Notifikasi WhatsApp approver terkirim!',
-        error: (err) => `Gagal kirim WA: ${err.message || 'Cek koneksi/API Key'}`
-      });
+      if (role === "STAFF") {
+        toast.promise(sendStaffInputWhatsAppNotification(transactionData.code), {
+          loading: 'Mengirim notifikasi WhatsApp...',
+          success: 'Notifikasi WhatsApp terkirim!',
+          error: (err) => `Gagal kirim WA: ${err.message || 'Cek koneksi/API Key'}`
+        });
+      } else {
+        toast.promise(sendApprovalWhatsAppNotification(transactionData), {
+          loading: 'Mengirim notifikasi WhatsApp ke approver...',
+          success: 'Notifikasi WhatsApp approver terkirim!',
+          error: (err) => `Gagal kirim WA: ${err.message || 'Cek koneksi/API Key'}`
+        });
+      }
 
       // Reset Form
       setStatus("DIAJUKAN");

@@ -10,8 +10,11 @@ import { FileSpreadsheet, Upload, Download, CheckCircle2, Loader2, X } from "luc
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { logActivity } from "@/utils/logger";
+import { useAuth } from "@/components/AuthProvider";
+import { sendStaffInputWhatsAppNotification } from "@/utils/whatsappNotifications";
 
 const BulkImport = () => {
+  const { role } = useAuth();
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [fileName, setFileName] = useState<string>("");
@@ -153,9 +156,15 @@ const BulkImport = () => {
         file_name: fileName
       });
 
-      toast.success(`${formattedData.length} data berhasil diimpor! Mengirim ringkasan WhatsApp...`);
-      await sendSummaryNotification(formattedData);
-      toast.success("Ringkasan WhatsApp telah dikirim.");
+      if (role === "STAFF") {
+        toast.success(`${formattedData.length} data berhasil diimpor! Mengirim notifikasi WhatsApp...`);
+        await Promise.all(formattedData.map((item) => sendStaffInputWhatsAppNotification(item.code)));
+        toast.success("Notifikasi WhatsApp telah dikirim.");
+      } else {
+        toast.success(`${formattedData.length} data berhasil diimpor! Mengirim ringkasan WhatsApp...`);
+        await sendSummaryNotification(formattedData);
+        toast.success("Ringkasan WhatsApp telah dikirim.");
+      }
       setPreviewData([]);
       setFileName("");
     } catch (error: any) {

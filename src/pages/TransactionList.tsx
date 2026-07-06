@@ -176,6 +176,10 @@ const TransactionList = () => {
       ["Kode Transaksi", t.code],
     ];
 
+    if (t.approval_request_reason) {
+      tableData.push(["Alasan Perlu Approval", t.approval_request_reason]);
+    }
+
     // Tambahkan informasi penyetuju jika statusnya DISETUJUI
     if (t.status === "DISETUJUI") {
       let approvers = [];

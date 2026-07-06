@@ -6,6 +6,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { logActivity } from "@/utils/logger";
 import { sendApprovalWhatsAppNotification, shouldNotifyApprovers } from "@/utils/whatsappNotifications";
 import {
@@ -53,6 +54,7 @@ const EditTransactionDialog = ({ transaction, open, onOpenChange, onSuccess }: E
         assigned_director_email: transaction.assigned_director_email || "",
         manager_approved: transaction.manager_approved || false,
         director_approved: transaction.director_approved || false,
+        approval_request_reason: transaction.approval_request_reason || "",
       });
     }
   }, [transaction]);
@@ -106,6 +108,11 @@ const EditTransactionDialog = ({ transaction, open, onOpenChange, onSuccess }: E
       return;
     }
 
+    if (formData.approval_type !== "NONE" && !formData.approval_request_reason?.trim()) {
+      toast.error("Alasan perlu approval wajib diisi");
+      return;
+    }
+
     setIsSaving(true);
     const updatedTransactionData = {
       status: formData.approval_type === "NONE" ? "DISETUJUI" : formData.status,
@@ -114,6 +121,7 @@ const EditTransactionDialog = ({ transaction, open, onOpenChange, onSuccess }: E
       assigned_director_email: (formData.approval_type === "DIREKTUR" || formData.approval_type === "BOTH") ? formData.assigned_director_email || null : null,
       manager_approved: formData.approval_type === "NONE" || formData.approval_type === "DIREKTUR" || formData.manager_approved,
       director_approved: formData.approval_type === "NONE" || formData.approval_type === "MANAGER" || formData.director_approved,
+      approval_request_reason: formData.approval_type === "NONE" ? null : formData.approval_request_reason.trim(),
     };
 
     try {
@@ -236,6 +244,21 @@ const EditTransactionDialog = ({ transaction, open, onOpenChange, onSuccess }: E
                   </div>
                 )}
               </div>
+
+              {formData.approval_type !== "NONE" && (
+                <div className="space-y-2 pt-2 border-t border-slate-200">
+                  <Label htmlFor="approval-request-reason">
+                    Alasan Perlu Approval <span className="text-red-500">*</span>
+                  </Label>
+                  <Textarea
+                    id="approval-request-reason"
+                    value={formData.approval_request_reason || ""}
+                    onChange={(e) => setFormData({ ...formData, approval_request_reason: e.target.value })}
+                    placeholder="Tuliskan alasan kenapa transaksi ini perlu approval..."
+                    className="bg-white min-h-[90px]"
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -138,6 +138,12 @@ const TransactionPreviewDialog = ({
               <span className="text-xs text-slate-500">Approval</span>
               <span className="text-xs font-bold text-slate-800">{transaction.approval_type || "NONE"}</span>
             </div>
+            {transaction.approval_request_reason && (
+              <div className="py-2 border-b border-slate-100 space-y-1">
+                <span className="text-xs text-slate-500">Alasan Perlu Approval</span>
+                <p className="text-xs text-slate-700 whitespace-pre-line">{transaction.approval_request_reason}</p>
+              </div>
+            )}
             {(transaction.approval_type === "MANAGER" || transaction.approval_type === "BOTH") && (
               <div className="py-2 border-b border-slate-100 space-y-1">
                 <div className="flex justify-between items-center">
