@@ -101,16 +101,16 @@ const TransactionPreviewDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl rounded-3xl overflow-hidden p-0 border-none shadow-2xl">
-        <DialogHeader className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 pb-4 border-b border-primary/5">
-          <DialogTitle className="text-xl font-black text-slate-800 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
+      <DialogContent className="max-w-xl max-h-[92vh] rounded-2xl overflow-hidden p-0 border-none shadow-2xl flex flex-col">
+        <DialogHeader className="bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-3 border-b border-primary/5 shrink-0">
+          <DialogTitle className="text-base font-black text-slate-800 flex items-center gap-2">
+            <FileText className="w-4 h-4 text-primary" />
             Detail Approval Transaksi
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+        <div className="px-4 py-3 space-y-3 overflow-y-auto min-h-0">
+          <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
             <div className="space-y-1">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
                 <Calendar className="w-3 h-3" /> Tanggal
@@ -127,25 +127,25 @@ const TransactionPreviewDialog = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between items-center py-2 border-b border-slate-100">
+          <div className="space-y-1">
+            <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
               <span className="text-xs text-slate-500">Status</span>
               <Badge variant={transaction.status === "DIBATALKAN" ? "destructive" : "outline"}>
                 {transaction.status || "DIAJUKAN"}
               </Badge>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-slate-100">
+            <div className="flex justify-between items-center py-1.5 border-b border-slate-100">
               <span className="text-xs text-slate-500">Approval</span>
               <span className="text-xs font-bold text-slate-800">{transaction.approval_type || "NONE"}</span>
             </div>
             {transaction.approval_request_reason && (
-              <div className="py-2 border-b border-slate-100 space-y-1">
+              <div className="py-1.5 border-b border-slate-100 space-y-0.5">
                 <span className="text-xs text-slate-500">Alasan Perlu Approval</span>
                 <p className="text-xs text-slate-700 whitespace-pre-line">{transaction.approval_request_reason}</p>
               </div>
             )}
             {(transaction.approval_type === "MANAGER" || transaction.approval_type === "BOTH") && (
-              <div className="py-2 border-b border-slate-100 space-y-1">
+              <div className="py-1.5 border-b border-slate-100 space-y-0.5">
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-slate-500">Manager</span>
                   <Badge variant={transaction.manager_approved ? "default" : "outline"}>
@@ -163,7 +163,7 @@ const TransactionPreviewDialog = ({
               </div>
             )}
             {(transaction.approval_type === "DIREKTUR" || transaction.approval_type === "BOTH") && (
-              <div className="py-2 border-b border-slate-100 space-y-1">
+              <div className="py-1.5 border-b border-slate-100 space-y-0.5">
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-slate-500">Direktur</span>
                   <Badge variant={transaction.director_approved ? "default" : "outline"}>
@@ -183,7 +183,7 @@ const TransactionPreviewDialog = ({
           </div>
 
           {(role === "MANAGER" || role === "DIREKTUR") && (
-            <div className="space-y-2 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <div className="space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
               <Label htmlFor="approval-reason" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
                 <MessageSquareText className="w-3.5 h-3.5" />
                 Alasan Approve <span className="text-red-500">*</span>
@@ -193,13 +193,13 @@ const TransactionPreviewDialog = ({
                 value={approvalReason}
                 onChange={(e) => setApprovalReason(e.target.value)}
                 placeholder="Tuliskan alasan approve transaksi ini..."
-                className="bg-white min-h-[90px] text-xs rounded-xl"
+                className="bg-white min-h-[64px] text-xs rounded-xl"
               />
             </div>
           )}
         </div>
 
-        <DialogFooter className="bg-slate-50 p-4 border-t border-slate-100 flex flex-row items-center justify-end gap-2">
+        <DialogFooter className="bg-slate-50 px-4 py-3 border-t border-slate-100 flex flex-row items-center justify-end gap-2 shrink-0">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
