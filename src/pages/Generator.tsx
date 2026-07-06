@@ -28,11 +28,6 @@ const Generator = () => {
   const { user, role } = useAuth();
   const isSuperAdmin = role === "SUPER_ADMIN" || user?.email?.toLowerCase() === "salmon@pepenio.my.id";
 
-  const [rekananType, setRekananType] = useState("");
-  const [namaRekanan, setNamaRekanan] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [accountOwner, setAccountOwner] = useState("");
   const [status, setStatus] = useState("DIAJUKAN");
   const [generatedCode, setGeneratedCode] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -114,7 +109,7 @@ const Generator = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!generatedCode || !rekananType) {
+    if (!generatedCode) {
       toast.error("Mohon lengkapi semua field wajib");
       return;
     }
@@ -140,11 +135,11 @@ const Generator = () => {
       cabang: "",
       nama_siplah: "",
       produk: "",
-      rekanan_type: rekananType,
-      nama_rekanan: rekananType === "REKANAN" ? namaRekanan : null,
-      bank_name: bankName,
-      account_number: accountNumber,
-      account_owner: accountOwner,
+      rekanan_type: "NON REKANAN",
+      nama_rekanan: null,
+      bank_name: "",
+      account_number: "",
+      account_owner: "",
       status: approvalType === "NONE" ? "DISETUJUI" : status,
       code: generatedCode,
       approval_type: approvalType,
@@ -178,11 +173,6 @@ const Generator = () => {
       });
 
       // Reset Form
-      setRekananType("");
-      setNamaRekanan("");
-      setBankName("");
-      setAccountNumber("");
-      setAccountOwner("");
       setStatus("DIAJUKAN");
       setGeneratedCode("");
       setApprovalType("BOTH");
@@ -292,63 +282,6 @@ const Generator = () => {
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label>Rekanan</Label>
-              <Select onValueChange={setRekananType} value={rekananType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih Status Rekanan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="NON REKANAN">NON REKANAN</SelectItem>
-                  <SelectItem value="REKANAN">REKANAN</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {rekananType === "REKANAN" && (
-              <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                <Label htmlFor="namaRekanan">Nama Rekanan</Label>
-                <Input
-                  id="namaRekanan"
-                  value={namaRekanan}
-                  onChange={(e) => setNamaRekanan(e.target.value)}
-                  placeholder="Masukkan Nama Rekanan"
-                />
-              </div>
-            )}
-
-            <div className="md:col-span-2 space-y-4 pt-4 border-t">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">BM diberikan melalui</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="bankName">Nama Bank (Opsional)</Label>
-                  <Input
-                    id="bankName"
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    placeholder="Contoh: BCA, Mandiri"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="accountNumber">Nomor Rekening (Opsional)</Label>
-                  <Input
-                    id="accountNumber"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    placeholder="Nomor Rekening"
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="accountOwner">Pemilik Rekening (Opsional)</Label>
-                  <Input
-                    id="accountOwner"
-                    value={accountOwner}
-                    onChange={(e) => setAccountOwner(e.target.value)}
-                    placeholder="Nama Pemilik Rekening"
-                  />
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className="space-y-2 pt-4 border-t">

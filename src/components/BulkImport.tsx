@@ -6,7 +6,7 @@ import ExcelJS from 'exceljs';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { FileSpreadsheet, Upload, Download, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
+import { FileSpreadsheet, Upload, Download, CheckCircle2, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { logActivity } from "@/utils/logger";
@@ -38,11 +38,8 @@ const BulkImport = () => {
       message += `📊 Total: ${items.length} Transaksi\n\n`;
 
       items.forEach((item, index) => {
-        message += `${index + 1}. Rekanan: ${item.rekanan_type || "-"}\n`;
-        if (item.rekanan_type === "REKANAN") {
-          message += `   Nama: ${item.nama_rekanan || "-"}\n`;
-        }
-        message += `   Kode: \`${item.code}\`\n\n`;
+        message += `${index + 1}. Kode: \`${item.code}\`\n`;
+        message += `   Status: ${item.status || "-"}\n\n`;
       });
 
       message += `_Pesan otomatis dari Grand Line Manager_`;
@@ -60,23 +57,19 @@ const BulkImport = () => {
     const worksheet = workbook.addWorksheet('Template Transaksi');
 
     worksheet.columns = [
-      { header: 'Tipe Rekanan', key: 'rekanan_type', width: 15 },
-      { header: 'Nama Rekanan', key: 'rekanan_name', width: 25 },
-      { header: 'Nama Bank', key: 'bank', width: 15 },
-      { header: 'No Rekening', key: 'acc_no', width: 20 },
-      { header: 'Pemilik Rekening', key: 'acc_owner', width: 25 },
+      { header: 'Status', key: 'status', width: 18 },
     ];
 
     worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
     worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF640D5F' } };
 
-    const rekananOptions = ['NON REKANAN', 'REKANAN'];
+    const statusOptions = ['DIAJUKAN', 'DIBATALKAN'];
 
     for (let i = 2; i <= 1000; i++) {
       worksheet.getCell(`A${i}`).dataValidation = {
         type: 'list',
         allowBlank: true,
-        formulae: [`"${rekananOptions.join(',')}"`],
+        formulae: [`"${statusOptions.join(',')}"`],
       };
     }
 
@@ -120,12 +113,10 @@ const BulkImport = () => {
     const formattedData = previewData.map((row, index) => {
       const rowNum = index + 2;
       
-      const rekanan_type = row["Tipe Rekanan"];
-      const rekanan_name = row["Nama Rekanan"];
+      const status = row["Status"] || "DIAJUKAN";
 
-      if (!rekanan_type) errors.push(`Baris ${rowNum}: Tipe Rekanan wajib diisi`);
-      if (rekanan_type === "REKANAN" && !rekanan_name) {
-        errors.push(`Baris ${rowNum}: Nama Rekanan wajib diisi jika tipe adalah REKANAN`);
+      if (!["DIAJUKAN", "DIBATALKAN"].includes(status)) {
+        errors.push(`Baris ${rowNum}: Status harus DIAJUKAN atau DIBATALKAN`);
       }
 
       return {
@@ -137,12 +128,12 @@ const BulkImport = () => {
         cabang: "",
         nama_siplah: "",
         produk: "",
-        rekanan_type: rekanan_type || "",
-        nama_rekanan: rekanan_name || "",
-        bank_name: row["Nama Bank"] || "",
-        account_number: row["No Rekening"] || "",
-        account_owner: row["Pemilik Rekening"] || "",
-        status: "DIAJUKAN"
+        rekanan_type: "NON REKANAN",
+        nama_rekanan: "",
+        bank_name: "",
+        account_number: "",
+        account_owner: "",
+        status
       };
     });
 
@@ -250,10 +241,10 @@ const BulkImport = () => {
             </Button>
             
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ketentuan Kolom Wajib:</p>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ketentuan Kolom:</p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-slate-600">
-                <div className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-green-500" /> Tipe Rekanan</div>
-                <div className="flex items-center gap-1"><AlertCircle className="w-3 h-3 text-amber-500" /> Nama Rekanan (Jika REKANAN)</div>
+                <div className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-green-500" /> Status</div>
+                <div className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-green-500" /> Kode dibuat otomatis</div>
               </div>
             </div>
           </div>

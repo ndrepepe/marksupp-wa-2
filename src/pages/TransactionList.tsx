@@ -193,9 +193,7 @@ const TransactionList = () => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
       (t.code && t.code.toLowerCase().includes(searchLower)) ||
-      (t.nama_rekanan && t.nama_rekanan.toLowerCase().includes(searchLower)) ||
-      (t.bank_name && t.bank_name.toLowerCase().includes(searchLower)) ||
-      (t.account_owner && t.account_owner.toLowerCase().includes(searchLower));
+      (t.status && t.status.toLowerCase().includes(searchLower));
     
     const matchesPrintFilter = 
       printFilter === "all" ? true :
@@ -378,7 +376,7 @@ const TransactionList = () => {
             <div className="relative flex-1 w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Cari Kode, Rekanan, atau Bank..."
+                placeholder="Cari Kode atau Status..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -454,8 +452,6 @@ const TransactionList = () => {
                 <TableHead className="font-bold px-2">Status</TableHead>
                 <TableHead className="font-bold px-2">Approval</TableHead>
                 <TableHead className="font-bold px-2">Kode Transaksi</TableHead>
-                <TableHead className="font-bold px-2">Rekanan</TableHead>
-                <TableHead className="font-bold px-2">Bank / Rekening</TableHead>
                 {showPrintColumn && <TableHead className="font-bold text-center px-2">Print</TableHead>}
                 <TableHead className="font-bold text-center px-2">Aksi</TableHead>
               </TableRow>
@@ -463,7 +459,7 @@ const TransactionList = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={showPrintColumn ? 8 : 7} className="h-24 text-center">
+                  <TableCell colSpan={showPrintColumn ? 6 : 5} className="h-24 text-center">
                     <div className="flex items-center justify-center">
                       <Loader2 className="w-6 h-6 animate-spin mr-2" />
                       Memuat data...
@@ -472,7 +468,7 @@ const TransactionList = () => {
                 </TableRow>
               ) : filteredTransactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={showPrintColumn ? 8 : 7} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={showPrintColumn ? 6 : 5} className="h-24 text-center text-muted-foreground">
                     Tidak ada data transaksi yang membutuhkan tindakan Anda saat ini.
                   </TableCell>
                 </TableRow>
@@ -546,17 +542,6 @@ const TransactionList = () => {
                       <code className="bg-muted px-1.5 py-0.5 rounded text-[10px] font-mono border">
                         {t.code}
                       </code>
-                    </TableCell>
-                    <TableCell className="px-2">
-                      <div className="font-medium text-xs">{t.rekanan_type}</div>
-                      <div className="text-[10px] text-muted-foreground leading-tight">
-                        {t.rekanan_type === "REKANAN" ? t.nama_rekanan : "NON REKANAN"}
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-2">
-                      <div className="font-medium text-xs">{t.bank_name || "-"}</div>
-                      <div className="text-[10px] text-muted-foreground">{t.account_number || "-"}</div>
-                      <div className="text-[9px] italic leading-tight">{t.account_owner || "-"}</div>
                     </TableCell>
                     {showPrintColumn && (
                       <TableCell className="text-center px-2">

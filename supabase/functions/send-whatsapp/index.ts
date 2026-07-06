@@ -49,7 +49,8 @@ const buildApprovalMessage = (body: any, recipient: WhatsAppRecipient) => {
 
   return `*Permintaan Approval Transaksi*\n\n` +
     `Yth. ${roleLabel}, terdapat transaksi yang membutuhkan persetujuan Anda.\n\n` +
-    `Kode: ${body.code || "-"}${reason}\n\n` +
+    `Kode: ${body.code || "-"}\n` +
+    `Status: ${body.status || "DIAJUKAN"}${reason}\n\n` +
     `Silakan login ke aplikasi Grand Line Manager untuk melakukan approval.\n\n` +
     `_Pesan otomatis dari Grand Line Manager_`;
 };

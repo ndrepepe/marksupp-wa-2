@@ -4,6 +4,7 @@ type ApprovalType = "NONE" | "MANAGER" | "DIREKTUR" | "BOTH" | string;
 
 interface ApprovalNotificationPayload {
   code?: string;
+  status?: string;
   approval_type?: ApprovalType;
   assigned_manager_email?: string | null;
   assigned_director_email?: string | null;
@@ -26,6 +27,7 @@ export const sendApprovalWhatsAppNotification = async (data: ApprovalNotificatio
     body: {
       notification_type: "approval_request",
       code: data.code,
+      status: data.status,
       approval_type: data.approval_type,
       assigned_manager_email: data.assigned_manager_email,
       assigned_director_email: data.assigned_director_email,
