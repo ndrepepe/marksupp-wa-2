@@ -38,12 +38,13 @@ const needsRoleApproval = (approvalType: string | undefined, role: ApprovalRole)
 const buildApprovalMessage = (body: any, recipient: WhatsAppRecipient) => {
   const roleLabel = recipient.role === "DIREKTUR" ? "Direktur" : "Manager";
 
-  return `*Permintaan Approval Transaksi*\n\n` +
+  return `Permintaan Approval Transaksi\n\n` +
     `Yth. ${roleLabel}, terdapat transaksi yang membutuhkan persetujuan Anda.\n\n` +
+    `\n` +
     `Kode: ${body.code || "-"}\n` +
     `\n` +
     `Silakan login ke aplikasi Grand Line Manager untuk melakukan approval.\n\n` +
-    `_Pesan otomatis dari Grand Line Manager_`;
+    `Pesan otomatis dari Grand Line Manager`;
 };
 
 const buildDefaultMessage = (body: any) => {
