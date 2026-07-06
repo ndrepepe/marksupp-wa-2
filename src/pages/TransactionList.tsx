@@ -180,12 +180,20 @@ const TransactionList = () => {
     if (t.status === "DISETUJUI") {
       let approvers = [];
       if (t.manager_approved && t.assigned_manager_email) {
-        approvers.push(`Manager (${t.assigned_manager_email})`);
+        approvers.push(
+          `Manager (${t.assigned_manager_email})` +
+          `${t.manager_approval_date ? `\n${new Date(t.manager_approval_date).toLocaleString("id-ID")}` : ""}` +
+          `${t.manager_approval_reason ? `\nAlasan: ${t.manager_approval_reason}` : ""}`
+        );
       }
       if (t.director_approved && t.assigned_director_email) {
-        approvers.push(`Direktur (${t.assigned_director_email})`);
+        approvers.push(
+          `Direktur (${t.assigned_director_email})` +
+          `${t.director_approval_date ? `\n${new Date(t.director_approval_date).toLocaleString("id-ID")}` : ""}` +
+          `${t.director_approval_reason ? `\nAlasan: ${t.director_approval_reason}` : ""}`
+        );
       }
-      tableData.push(["Disetujui Oleh", approvers.length > 0 ? approvers.join("\n") : "Sistem (Tanpa Approval)"]);
+      tableData.push(["Disetujui Oleh", approvers.length > 0 ? approvers.join("\n\n") : "Sistem (Tanpa Approval)"]);
     }
 
     autoTable(doc, {
@@ -376,12 +384,18 @@ const TransactionList = () => {
                         {t.status === "DISETUJUI" && (
                           <div className="text-[9px] text-muted-foreground flex flex-col gap-0.5 mt-1 max-w-[140px] overflow-hidden">
                             {t.manager_approved && t.assigned_manager_email && (
-                              <span className="truncate block" title={`Manager: ${t.assigned_manager_email}`}>
+                              <span
+                                className="truncate block"
+                                title={`Manager: ${t.assigned_manager_email}${t.manager_approval_date ? ` - ${new Date(t.manager_approval_date).toLocaleString("id-ID")}` : ""}${t.manager_approval_reason ? ` - ${t.manager_approval_reason}` : ""}`}
+                              >
                                 M: {t.assigned_manager_email}
                               </span>
                             )}
                             {t.director_approved && t.assigned_director_email && (
-                              <span className="truncate block" title={`Direktur: ${t.assigned_director_email}`}>
+                              <span
+                                className="truncate block"
+                                title={`Direktur: ${t.assigned_director_email}${t.director_approval_date ? ` - ${new Date(t.director_approval_date).toLocaleString("id-ID")}` : ""}${t.director_approval_reason ? ` - ${t.director_approval_reason}` : ""}`}
+                              >
                                 D: {t.assigned_director_email}
                               </span>
                             )}
@@ -401,6 +415,11 @@ const TransactionList = () => {
                                 <Badge variant={t.manager_approved ? "default" : "outline"} className="text-[9px] px-1 py-0">
                                   {t.manager_approved ? "Approved" : "Pending"}
                                 </Badge>
+                                {t.manager_approval_date && (
+                                  <span className="text-[9px] text-muted-foreground">
+                                    {new Date(t.manager_approval_date).toLocaleDateString("id-ID")}
+                                  </span>
+                                )}
                               </div>
                             )}
                             {(t.approval_type === "DIREKTUR" || t.approval_type === "BOTH") && (
@@ -409,6 +428,11 @@ const TransactionList = () => {
                                 <Badge variant={t.director_approved ? "default" : "outline"} className="text-[9px] px-1 py-0">
                                   {t.director_approved ? "Approved" : "Pending"}
                                 </Badge>
+                                {t.director_approval_date && (
+                                  <span className="text-[9px] text-muted-foreground">
+                                    {new Date(t.director_approval_date).toLocaleDateString("id-ID")}
+                                  </span>
+                                )}
                               </div>
                             )}
                           </>

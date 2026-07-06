@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2, ThumbsUp, FileText, Calendar, KeyRound } from "lucide-react";
+import { Loader2, ThumbsUp, FileText, Calendar, KeyRound, MessageSquareText } from "lucide-react";
 
 interface TransactionPreviewDialogProps {
   transaction: any;
@@ -31,18 +33,29 @@ const TransactionPreviewDialog = ({
 }: TransactionPreviewDialogProps) => {
   const { role } = useAuth();
   const [isApproving, setIsApproving] = useState(false);
+  const [approvalReason, setApprovalReason] = useState("");
 
   if (!transaction) return null;
 
   const handleApprove = async () => {
+    if (!approvalReason.trim()) {
+      toast.error("Alasan approve wajib diisi");
+      return;
+    }
+
     setIsApproving(true);
     try {
       const updates: any = {};
+      const approvedAt = new Date().toISOString();
 
       if (role === "MANAGER") {
         updates.manager_approved = true;
+        updates.manager_approval_date = approvedAt;
+        updates.manager_approval_reason = approvalReason.trim();
       } else if (role === "DIREKTUR") {
         updates.director_approved = true;
+        updates.director_approval_date = approvedAt;
+        updates.director_approval_reason = approvalReason.trim();
       }
 
       const willBeManagerApproved = role === "MANAGER" ? true : transaction.manager_approved;
@@ -69,10 +82,13 @@ const TransactionPreviewDialog = ({
         transaction_id: transaction.id,
         code: transaction.code,
         role,
+        reason: approvalReason.trim(),
+        approved_at: approvedAt,
         fully_approved: isFullyApproved,
       });
 
       toast.success("Transaksi berhasil disetujui!");
+      setApprovalReason("");
       if (onSuccess) onSuccess();
       onOpenChange(false);
     } catch (error: any) {
@@ -123,22 +139,58 @@ const TransactionPreviewDialog = ({
               <span className="text-xs font-bold text-slate-800">{transaction.approval_type || "NONE"}</span>
             </div>
             {(transaction.approval_type === "MANAGER" || transaction.approval_type === "BOTH") && (
-              <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                <span className="text-xs text-slate-500">Manager</span>
-                <Badge variant={transaction.manager_approved ? "default" : "outline"}>
-                  {transaction.manager_approved ? "Approved" : "Pending"}
-                </Badge>
+              <div className="py-2 border-b border-slate-100 space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Manager</span>
+                  <Badge variant={transaction.manager_approved ? "default" : "outline"}>
+                    {transaction.manager_approved ? "Approved" : "Pending"}
+                  </Badge>
+                </div>
+                {transaction.manager_approval_date && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {new Date(transaction.manager_approval_date).toLocaleString("id-ID")}
+                  </p>
+                )}
+                {transaction.manager_approval_reason && (
+                  <p className="text-xs text-slate-700 whitespace-pre-line">{transaction.manager_approval_reason}</p>
+                )}
               </div>
             )}
             {(transaction.approval_type === "DIREKTUR" || transaction.approval_type === "BOTH") && (
-              <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                <span className="text-xs text-slate-500">Direktur</span>
-                <Badge variant={transaction.director_approved ? "default" : "outline"}>
-                  {transaction.director_approved ? "Approved" : "Pending"}
-                </Badge>
+              <div className="py-2 border-b border-slate-100 space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Direktur</span>
+                  <Badge variant={transaction.director_approved ? "default" : "outline"}>
+                    {transaction.director_approved ? "Approved" : "Pending"}
+                  </Badge>
+                </div>
+                {transaction.director_approval_date && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {new Date(transaction.director_approval_date).toLocaleString("id-ID")}
+                  </p>
+                )}
+                {transaction.director_approval_reason && (
+                  <p className="text-xs text-slate-700 whitespace-pre-line">{transaction.director_approval_reason}</p>
+                )}
               </div>
             )}
           </div>
+
+          {(role === "MANAGER" || role === "DIREKTUR") && (
+            <div className="space-y-2 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+              <Label htmlFor="approval-reason" className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                <MessageSquareText className="w-3.5 h-3.5" />
+                Alasan Approve <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                id="approval-reason"
+                value={approvalReason}
+                onChange={(e) => setApprovalReason(e.target.value)}
+                placeholder="Tuliskan alasan approve transaksi ini..."
+                className="bg-white min-h-[90px] text-xs rounded-xl"
+              />
+            </div>
+          )}
         </div>
 
         <DialogFooter className="bg-slate-50 p-4 border-t border-slate-100 flex flex-row items-center justify-end gap-2">
@@ -153,7 +205,7 @@ const TransactionPreviewDialog = ({
             <Button
               variant="default"
               onClick={handleApprove}
-              disabled={isApproving}
+              disabled={isApproving || !approvalReason.trim()}
               className="bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-xs h-9 px-4 flex items-center gap-1.5"
             >
               {isApproving ? (
