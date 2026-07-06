@@ -203,14 +203,6 @@ const TransactionList = () => {
     return matchesSearch && matchesPrintFilter;
   });
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
   const downloadPDF = async (t: any) => {
     const doc = new jsPDF();
     
@@ -228,13 +220,9 @@ const TransactionList = () => {
     
     const tableData = [
       ["Tanggal Input", new Date(t.created_at).toLocaleDateString("id-ID")],
-      ["Nama Sekolah", t.school_name],
-      ["Cabang", t.cabang || "-"],
-      ["Nomor PO", t.po_number],
-      ["Platform SIPLAH", t.nama_siplah],
-      ["Jenis Produk", t.produk],
-      ["Nominal Transaksi", formatCurrency(t.transaction_amount)],
       ["Status Transaksi", t.status],
+      ["Tipe Approval", t.approval_type || "NONE"],
+      ["Kode Transaksi", t.code],
     ];
 
     // Tambahkan informasi penyetuju jika statusnya DISETUJUI
@@ -248,32 +236,6 @@ const TransactionList = () => {
       }
       tableData.push(["Disetujui Oleh", approvers.length > 0 ? approvers.join("\n") : "Sistem (Tanpa Approval)"]);
     }
-
-    tableData.push(
-      ["Tipe Rekanan", t.rekanan_type],
-      ["Nama Rekanan", t.rekanan_type === "REKANAN" ? t.nama_rekanan : "NON REKANAN"]
-    );
-
-    // Add BM Details
-    tableData.push(["", ""]);
-    tableData.push(["RINCIAN % BM", ""]);
-    
-    if (t.bm_splits && Array.isArray(t.bm_splits)) {
-      t.bm_splits.forEach((split: any, idx: number) => {
-        tableData.push([
-          `Bagian ${idx + 1}`, 
-          `${formatCurrency(parseFloat(split.amount))} @ ${split.percentage}%`
-        ]);
-      });
-    } else {
-      tableData.push(["Persentase BM", `${t.bm_percentage}%`]);
-    }
-
-    tableData.push(["", ""]);
-    tableData.push(["INFORMASI PEMBAYARAN BM", ""]);
-    tableData.push(["Nama Bank", t.bank_name || "-"]);
-    tableData.push(["Nomor Rekening", t.account_number || "-"]);
-    tableData.push(["Pemilik Rekening", t.account_owner || "-"]);
 
     // Tambahkan Alasan & Catatan Approval jika ada
     if (t.reason_for_approval) {
@@ -297,7 +259,7 @@ const TransactionList = () => {
       },
       didParseCell: function(data) {
         const label = data.row.raw[0];
-        if (label === "INFORMASI PEMBAYARAN BM" || label === "RINCIAN % BM" || label === "ALASAN & CATATAN APPROVAL") {
+        if (label === "ALASAN & CATATAN APPROVAL") {
           data.cell.styles.fontStyle = 'bold';
           data.cell.styles.fillColor = [241, 245, 249];
           data.cell.styles.textColor = [30, 41, 59];
