@@ -30,14 +30,6 @@ const normalizePhoneNumber = (phone?: string | null) => {
   return normalized;
 };
 
-const formatCurrency = (value: number | string | undefined) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(Number(value) || 0);
-};
-
 const needsRoleApproval = (approvalType: string | undefined, role: ApprovalRole) => {
   const type = approvalType || "NONE";
   return type === role || type === "BOTH";
@@ -45,12 +37,12 @@ const needsRoleApproval = (approvalType: string | undefined, role: ApprovalRole)
 
 const buildApprovalMessage = (body: any, recipient: WhatsAppRecipient) => {
   const roleLabel = recipient.role === "DIREKTUR" ? "Direktur" : "Manager";
-  const reason = body.reason_for_approval ? `\nAlasan: ${body.reason_for_approval}` : "";
 
   return `*Permintaan Approval Transaksi*\n\n` +
     `Yth. ${roleLabel}, terdapat transaksi yang membutuhkan persetujuan Anda.\n\n` +
     `Kode: ${body.code || "-"}\n` +
-    `Status: ${body.status || "DIAJUKAN"}${reason}\n\n` +
+    `Status: ${body.status || "DIAJUKAN"}\n` +
+    `Approval: ${body.approval_type || "NONE"}\n\n` +
     `Silakan login ke aplikasi Grand Line Manager untuk melakukan approval.\n\n` +
     `_Pesan otomatis dari Grand Line Manager_`;
 };
@@ -59,10 +51,8 @@ const buildDefaultMessage = (body: any) => {
   if (body.message) return body.message;
 
   return `*Transaksi Baru*\n\n` +
-    `Sekolah: ${body.school_name || "-"}\n` +
-    `No PO: ${body.po_number || "-"}\n` +
-    `Nominal: ${formatCurrency(body.transaction_amount)}\n` +
     `Kode: ${body.code || "-"}\n\n` +
+    `Status: ${body.status || "DIAJUKAN"}\n\n` +
     `_Pesan otomatis dari Grand Line Manager_`;
 };
 

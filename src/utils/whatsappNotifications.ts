@@ -8,7 +8,6 @@ interface ApprovalNotificationPayload {
   approval_type?: ApprovalType;
   assigned_manager_email?: string | null;
   assigned_director_email?: string | null;
-  reason_for_approval?: string | null;
 }
 
 export const shouldNotifyApprovers = (data: ApprovalNotificationPayload) => {
@@ -31,7 +30,6 @@ export const sendApprovalWhatsAppNotification = async (data: ApprovalNotificatio
       approval_type: data.approval_type,
       assigned_manager_email: data.assigned_manager_email,
       assigned_director_email: data.assigned_director_email,
-      reason_for_approval: data.reason_for_approval,
     },
   });
 

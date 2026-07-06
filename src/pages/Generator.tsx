@@ -127,19 +127,6 @@ const Generator = () => {
     setIsSaving(true);
     
     const transactionData = {
-      school_name: "",
-      po_number: "",
-      transaction_amount: 0,
-      bm_percentage: 0,
-      bm_splits: null,
-      cabang: "",
-      nama_siplah: "",
-      produk: "",
-      rekanan_type: "NON REKANAN",
-      nama_rekanan: null,
-      bank_name: "",
-      account_number: "",
-      account_owner: "",
       status: approvalType === "NONE" ? "DISETUJUI" : status,
       code: generatedCode,
       approval_type: approvalType,

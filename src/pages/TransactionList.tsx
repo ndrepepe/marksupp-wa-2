@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, RefreshCw, Search, Edit, Trash2, FileDown, CheckCircle, Circle, Filter, X, Calendar, Paperclip, Image as ImageIcon, Eye } from "lucide-react";
+import { Loader2, RefreshCw, Search, Edit, Trash2, FileDown, X, Calendar, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -31,21 +31,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import EditTransactionDialog from "@/components/EditTransactionDialog";
-import AttachmentDialog from "@/components/AttachmentDialog";
 import TransactionPreviewDialog from "@/components/TransactionPreviewDialog";
 
 const TransactionList = () => {
   const { user, role } = useAuth();
-  const isSuperAdmin = role === "SUPER_ADMIN" || user?.email?.toLowerCase() === "salmon@pepenio.my.id";
-  const showPrintColumn = role !== "MANAGER" && role !== "DIREKTUR";
 
   // Helper to get last 30 days range including today
   const getLast30DaysRange = () => {
@@ -63,7 +53,6 @@ const TransactionList = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [printFilter, setPrintFilter] = useState<string>("all");
   const [startDate, setStartDate] = useState<string>(defaultRange.start);
   const [endDate, setEndDate] = useState<string>(defaultRange.end);
 
@@ -74,10 +63,6 @@ const TransactionList = () => {
   // State for Delete
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  // State for Attachment
-  const [attachmentTransaction, setAttachmentTransaction] = useState<any>(null);
-  const [isAttachmentDialogOpen, setIsAttachmentDialogOpen] = useState(false);
 
   // State for Preview
   const [previewTransaction, setPreviewTransaction] = useState<any>(null);
@@ -141,34 +126,6 @@ const TransactionList = () => {
     }
   };
 
-  const markTransactionPrinted = async (transactionId: string) => {
-    try {
-      const { error } = await supabase
-        .from("transactions")
-        .update({ is_printed: true })
-        .eq("id", transactionId);
-
-      if (error) throw error;
-
-      await logActivity("MARK_PRINTED", {
-        transaction_id: transactionId
-      });
-    } catch (error: any) {
-      console.error("Error marking printed:", error);
-      throw error;
-    }
-  };
-
-  const handlePrint = async (transactionId: string) => {
-    try {
-      await markTransactionPrinted(transactionId);
-      toast.success("Transaksi telah ditandai sebagai sudah di-print");
-      fetchTransactions();
-    } catch (error: any) {
-      toast.error("Gagal menandai transaksi: " + error.message);
-    }
-  };
-
   const filteredTransactions = transactions.filter((t) => {
     // 1. Filter berdasarkan Role & Email Penanggung Jawab
     const userEmail = user?.email?.toLowerCase();
@@ -189,18 +146,12 @@ const TransactionList = () => {
       if (!isAssigned || !needsDirectorApproval || !isNotYetApproved) return false;
     }
 
-    // 2. Filter Pencarian & Print (untuk semua role)
+    // 2. Filter Pencarian (untuk semua role)
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
+    return (
       (t.code && t.code.toLowerCase().includes(searchLower)) ||
-      (t.status && t.status.toLowerCase().includes(searchLower));
-    
-    const matchesPrintFilter = 
-      printFilter === "all" ? true :
-      printFilter === "printed" ? t.is_printed === true :
-      t.is_printed === false || t.is_printed === null;
-
-    return matchesSearch && matchesPrintFilter;
+      (t.status && t.status.toLowerCase().includes(searchLower))
+    );
   });
 
   const downloadPDF = async (t: any) => {
@@ -237,13 +188,6 @@ const TransactionList = () => {
       tableData.push(["Disetujui Oleh", approvers.length > 0 ? approvers.join("\n") : "Sistem (Tanpa Approval)"]);
     }
 
-    // Tambahkan Alasan & Catatan Approval jika ada
-    if (t.reason_for_approval) {
-      tableData.push(["", ""]);
-      tableData.push(["ALASAN & CATATAN APPROVAL", ""]);
-      tableData.push(["Detail", t.reason_for_approval]);
-    }
-
     autoTable(doc, {
       startY: 35,
       body: tableData,
@@ -257,14 +201,6 @@ const TransactionList = () => {
         0: { fontStyle: 'bold', cellWidth: 60, textColor: [30, 41, 59] },
         1: { cellWidth: 'auto' }
       },
-      didParseCell: function(data) {
-        const label = data.row.raw[0];
-        if (label === "ALASAN & CATATAN APPROVAL") {
-          data.cell.styles.fontStyle = 'bold';
-          data.cell.styles.fillColor = [241, 245, 249];
-          data.cell.styles.textColor = [30, 41, 59];
-        }
-      }
     });
 
     const finalY = (doc as any).lastAutoTable.finalY || 150;
@@ -274,19 +210,13 @@ const TransactionList = () => {
 
     doc.save(`transaksi-${t.code}.pdf`);
 
-    // Mencatat log aktivitas download PDF dan menandai sudah diprint
+    // Mencatat log aktivitas download PDF
     await logActivity("DOWNLOAD_PDF", {
       transaction_id: t.id,
-      school_name: t.school_name,
       code: t.code
     });
 
-    if (!t.is_printed) {
-      await markTransactionPrinted(t.id);
-    }
-
     toast.success("PDF berhasil diunduh");
-    fetchTransactions();
   };
 
   const resetDateFilters = () => {
@@ -346,20 +276,6 @@ const TransactionList = () => {
             </div>
             
             <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-              <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-                <Select value={printFilter} onValueChange={setPrintFilter}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Filter Print" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua Status</SelectItem>
-                    <SelectItem value="printed">Sudah Print</SelectItem>
-                    <SelectItem value="not_printed">Belum Print</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="flex items-center gap-1 sm:gap-2 bg-muted/50 p-1 rounded-lg border border-border w-full sm:w-auto overflow-hidden">
                 <div className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-2 flex-1 min-w-0">
                   <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -414,14 +330,13 @@ const TransactionList = () => {
                 <TableHead className="font-bold px-2">Status</TableHead>
                 <TableHead className="font-bold px-2">Approval</TableHead>
                 <TableHead className="font-bold px-2">Kode Transaksi</TableHead>
-                {showPrintColumn && <TableHead className="font-bold text-center px-2">Print</TableHead>}
                 <TableHead className="font-bold text-center px-2">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={showPrintColumn ? 6 : 5} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     <div className="flex items-center justify-center">
                       <Loader2 className="w-6 h-6 animate-spin mr-2" />
                       Memuat data...
@@ -430,7 +345,7 @@ const TransactionList = () => {
                 </TableRow>
               ) : filteredTransactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={showPrintColumn ? 6 : 5} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                     Tidak ada data transaksi yang membutuhkan tindakan Anda saat ini.
                   </TableCell>
                 </TableRow>
@@ -505,29 +420,6 @@ const TransactionList = () => {
                         {t.code}
                       </code>
                     </TableCell>
-                    {showPrintColumn && (
-                      <TableCell className="text-center px-2">
-                        <div className="flex items-center justify-center gap-1">
-                          {t.status === "DISETUJUI" ? (
-                            t.is_printed ? (
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                onClick={() => handlePrint(t.id)}
-                                title="Tandai sebagai sudah di-print"
-                              >
-                                <Circle className="w-3.5 h-3.5" />
-                              </Button>
-                            )
-                          ) : (
-                            <span className="text-muted-foreground text-xs">-</span>
-                          )}
-                        </div>
-                      </TableCell>
-                    )}
                     <TableCell className="px-2">
                       <div className="flex items-center justify-center gap-1">
                         {/* Tombol Preview untuk Manager / Direktur */}
@@ -549,35 +441,31 @@ const TransactionList = () => {
                         {/* Tombol untuk Staff */}
                         {role === "STAFF" && (
                           <>
-                            {!t.is_printed && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-7 w-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  onClick={() => {
-                                    setEditingTransaction(t);
-                                    setIsEditDialogOpen(true);
-                                  }}
-                                  title="Edit"
-                                >
-                                  <Edit className="w-3.5 h-3.5" />
-                                </Button>
-                                {t.status !== "DISETUJUI" && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    onClick={() => {
-                                      setDeletingId(t.id);
-                                      setIsDeleteDialogOpen(true);
-                                    }}
-                                    title="Hapus"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </Button>
-                                )}
-                              </>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              onClick={() => {
+                                setEditingTransaction(t);
+                                setIsEditDialogOpen(true);
+                              }}
+                              title="Edit"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </Button>
+                            {t.status !== "DISETUJUI" && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => {
+                                  setDeletingId(t.id);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                                title="Hapus"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
                             )}
                           </>
                         )}
@@ -585,23 +473,6 @@ const TransactionList = () => {
                         {/* Tombol untuk Super Admin */}
                         {role === "SUPER_ADMIN" && (
                           <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={cn(
-                                "h-7 w-7",
-                                t.attachment_url 
-                                  ? "text-orange-600 hover:text-orange-700 hover:bg-orange-50" 
-                                  : "text-slate-400 hover:text-slate-500 hover:bg-slate-50"
-                              )}
-                              onClick={() => {
-                                setAttachmentTransaction(t);
-                                setIsAttachmentDialogOpen(true);
-                              }}
-                              title="Lampiran Bukti"
-                            >
-                              {t.attachment_url ? <ImageIcon className="w-3.5 h-3.5" /> : <Paperclip className="w-3.5 h-3.5" />}
-                            </Button>
                             {t.status === "DISETUJUI" && (
                               <Button
                                 variant="ghost"
@@ -613,35 +484,31 @@ const TransactionList = () => {
                                 <FileDown className="w-3.5 h-3.5" />
                               </Button>
                             )}
-                            {!t.is_printed && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-7 w-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  onClick={() => {
-                                    setEditingTransaction(t);
-                                    setIsEditDialogOpen(true);
-                                  }}
-                                  title="Edit"
-                                >
-                                  <Edit className="w-3.5 h-3.5" />
-                                </Button>
-                                {t.status !== "DISETUJUI" && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    onClick={() => {
-                                      setDeletingId(t.id);
-                                      setIsDeleteDialogOpen(true);
-                                    }}
-                                    title="Hapus"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </Button>
-                                )}
-                              </>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              onClick={() => {
+                                setEditingTransaction(t);
+                                setIsEditDialogOpen(true);
+                              }}
+                              title="Edit"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </Button>
+                            {t.status !== "DISETUJUI" && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => {
+                                  setDeletingId(t.id);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                                title="Hapus"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
                             )}
                           </>
                         )}
@@ -659,13 +526,6 @@ const TransactionList = () => {
         transaction={editingTransaction}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
-        onSuccess={fetchTransactions}
-      />
-
-      <AttachmentDialog
-        transaction={attachmentTransaction}
-        open={isAttachmentDialogOpen}
-        onOpenChange={setIsAttachmentDialogOpen}
         onSuccess={fetchTransactions}
       />
 

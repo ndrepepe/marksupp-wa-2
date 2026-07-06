@@ -50,7 +50,7 @@ const SubmissionGuide = () => {
       bgColor: "bg-purple-50/50",
       detailInfo: [
         "Tim SIPLAH membuka menu Input Transaksi.",
-        "Memasukkan detail nominal, nomor PO, dan keterangan cabang.",
+        "Memilih status, konfigurasi approval, dan membuat kode transaksi.",
         "Memastikan seluruh data valid sebelum disimpan ke sistem."
       ]
     },
@@ -65,8 +65,8 @@ const SubmissionGuide = () => {
       borderColor: "border-amber-100",
       bgColor: "bg-amber-50/50",
       detailInfo: [
-        "Accounting memeriksa data transaksi yang masuk di sistem.",
-        "Melakukan panggilan telepon ke Cabang terkait untuk verifikasi kecocokan data.",
+        "Accounting memeriksa status, approval, dan kode transaksi yang masuk di sistem.",
+        "Melakukan panggilan telepon jika diperlukan untuk verifikasi transaksi.",
         "Menyetujui (approve) transaksi setelah konfirmasi berhasil."
       ]
     },
@@ -82,7 +82,7 @@ const SubmissionGuide = () => {
       bgColor: "bg-orange-50/50",
       detailInfo: [
         "Manager/Direktur menerima notifikasi atau melihat daftar transaksi yang ditugaskan.",
-        "Melakukan review rincian nominal, % BM, dan alasan pengajuan.",
+        "Melakukan review status, kode transaksi, dan kebutuhan approval.",
         "Klik tombol 'Approve' untuk menyetujui pengajuan transaksi."
       ]
     },
@@ -99,7 +99,7 @@ const SubmissionGuide = () => {
       detailInfo: [
         "Masuk ke menu Daftar Transaksi.",
         "Cari transaksi yang telah disetujui oleh Accounting.",
-        "Klik tombol cetak/print untuk mengunduh dokumen PDF resmi."
+        "Klik tombol download PDF untuk mengunduh dokumen resmi."
       ]
     }
   ];

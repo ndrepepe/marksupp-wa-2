@@ -120,19 +120,7 @@ const BulkImport = () => {
       }
 
       return {
-        school_name: "",
-        po_number: "",
-        transaction_amount: 0,
-        bm_percentage: 0,
         code: generateTransactionCode(),
-        cabang: "",
-        nama_siplah: "",
-        produk: "",
-        rekanan_type: "NON REKANAN",
-        nama_rekanan: "",
-        bank_name: "",
-        account_number: "",
-        account_owner: "",
         status
       };
     });
